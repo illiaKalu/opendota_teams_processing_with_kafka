@@ -1,0 +1,27 @@
+CREATE STREAM teams_input (
+    team_id INTEGER,
+    rating DOUBLE,
+    wins INTEGER,
+    losses INTEGER,
+    last_match_time INTEGER,
+    name VARCHAR,
+    tag VARCHAR,
+    logo_url VARCHAR
+  ) WITH (
+    KAFKA_TOPIC = 'team-topic',
+    VALUE_FORMAT = 'AVRO'
+  );
+
+CREATE STREAM top_teams AS
+    SELECT name, wins, rating
+    from teams_input
+    where rating >= 1000.0
+    EMIT CHANGES;
+
+CREATE TABLE team_by_win_loss_ration AS
+    SELECT name, AVG(wins / losses)
+    from teams_input
+    WINDOW TUMBLING(SIZE 2 minutes, GRACE PERIOD 2 hours)
+    group by name
+    EMIT CHANGES;
+

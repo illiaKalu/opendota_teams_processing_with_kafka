@@ -1,0 +1,39 @@
+{
+  "namespace": "io.codebrews.createuserrequest",
+  "type": "record",
+  "name": "Team",
+  "fields": [
+    {
+      "name": "team_id",
+      "type": "int"
+    },
+    {
+      "name": "rating",
+      "type": "float"
+    },
+    {
+      "name": "wins",
+      "type": "int"
+    },
+    {
+      "name": "losses",
+      "type": "int"
+    },
+    {
+      "name": "last_match_time",
+      "type": "int"
+    },
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "tag",
+      "type": "string"
+    },
+    {
+      "name": "logo_url",
+      "type": ["string", "null"]
+    }
+  ]
+}
