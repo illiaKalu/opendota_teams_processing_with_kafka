@@ -1,0 +1,146 @@
+GET _cat/indices
+
+GET team-topic/_settings
+GET team-topic/_mapping
+
+DELETE team-topic
+PUT /team-topic
+{
+  "settings": {
+    "analysis":{
+      "analyzer":{
+        "fuzzy_analyzer":{
+          "type":"custom",
+          "tokenizer":"standard",
+          "filter":[
+            "lowercase"
+          ]
+        },
+        "synonym_analyzer":{
+          "type":"custom",
+          "tokenizer":"standard",
+          "filter":[
+            "synonym"
+          ]
+        }
+      },
+      "filter":{
+        "synonym":{
+          "type":"synonym",
+          "lanient":true,
+          "synonyms":[
+            "Bad,bad,devil,evil,Devil,Evil",
+            "Tundra,tundra,jungle,Jungle"
+          ]
+        }
+      }
+    }
+  },
+  "mappings" : {
+    "properties" : {
+      "last_match_time" : {
+        "type" : "integer"
+      },
+      "logo_url" : {
+        "type" : "keyword"
+      },
+      "losses" : {
+        "type" : "integer"
+      },
+      "name" : {
+        "type" : "text",
+        "analyzer":"synonym_analyzer"
+      },
+      "rating" : {
+        "type" : "double"
+      },
+      "tag" : {
+        "type" : "text",
+        "analyzer":"fuzzy_analyzer"
+      },
+      "team_id" : {
+        "type" : "integer"
+      },
+      "wins" : {
+        "type" : "integer"
+      }
+    }
+  }
+}
+
+GET team-topic/_search
+{
+  "size": 200,
+  "query" : {
+    "match_all" : {}
+  }
+}
+
+GET team-topic/_search
+{
+  "size": 20,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "name": {
+              "query": "Bad Jungle Predators",
+              "fuzziness": 1,
+              "boost": 1.1
+            }
+          }
+        }
+      ],
+      "should": [
+        {
+          "bool": {
+            "minimum_should_match": 1,
+            "should": [
+              {
+                "range": {
+                  "rating": {
+                    "gte": 999.0
+                  }
+                }
+              },
+              {
+                "range": {
+                  "last_match_time": {
+                    "gte": 1045985009
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "must_not": [
+        {
+          "match": {
+            "tag": "TNC"
+          }
+        }
+      ],
+      "filter": [
+        {
+          "range": {
+            "wins": {
+              "gte": 50,
+              "boost": 1.25
+            }
+
+          }
+        },
+        {
+          "range": {
+            "losses": {
+              "lte": 1500,
+              "boost": 1.05
+            }
+          }
+        }
+      ]
+    }
+  }
+}
